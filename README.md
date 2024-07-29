@@ -2,129 +2,159 @@
 
 This guide walks you through setting up a virtual environment, creating a Scrapy project, running the web crawler to collect fire incident reports, and analyzing the data. Follow the steps below to get started.
 
-## Configurations and Installations
+## Table of Contents
+1. [Configurations and Installations](#configurations-and-installations)
+    11. [Select Interpreter](#Select-interpreter)
+    12. [Create a Virtual Environment](#create-a-virtual-environment)
+    13. [Activate the Virtual Environment](#activate-the-virtual-environment)
+    14. [Upgrade pip](#upgrade-pip)
+    15. [Install Required Libraries](#install-required-libraries)
+2. [Creating a Scrapy Project](#creating-a-scrapy-project)
+    21. [Start Scrapy Project](#5-start-scrapy-project)
+3. [Creating the Crawler Class](#creating-the-crawler-class)
+    31. [XPath Explanation](#explanation-of-the-logic)
+    32. [Create a Spider](#6-create-a-spider)
+4. [Running the Crawler](#running-the-crawler)
+    41. [Run Combine](#7-run-combine)
+    42. [Crawl the Webpage](#7b-crawl-the-webpage)
+    43. [Perform the Analysis](#7c-perform-the-analysis)
+5. [Conclusion](#8-conclusion)
 
-### 1. Create a Virtual Environment
+## 1. Configurations and Installations
+### 11. Select Interpreter
+
+- Go to VS Code
+    - Windows:
+        - Ctrl + Shift + P
+    - Mac:
+        - Cmd + Shift + P
+- Type:
+    - Python: Select Interpreter
+    - Click on your preferred Interpreter 
+        - Python 3.11.9 64-bit (Microsoft Store)
+
+### 12. Create a Virtual Environment
 Create a virtual environment to manage your project's dependencies.
-```
+```sh
 python -m venv venv
 ```
 
-### 2. Activate the Virtual Environment
+### 13. Activate the Virtual Environment
 Activate the virtual environment to use the installed packages.
 
 - On Windows:
-```
-.\venv\Scripts\activate
-```
+    ```sh
+    .\venv\Scripts\activate
+    ```
 
 - On Unix or MacOS:
-```
-source venv/bin/activate
-```
+    ```sh
+    source venv/bin/activate
+    ```
 
-### 3. Upgrade pip to the latest version.
-```
+### 14. Upgrade pip
+Upgrade pip to the latest version.
+```sh
 python -m pip install --upgrade pip
 ```
 
-### 4. Install Required Libraries
-Install the necessary libraries specified in the requirements.txt file.
+### 15. Install Required Libraries
+Install the necessary libraries specified in the `requirements.txt` file.
 
-```
+```sh
 pip install -r requirements.txt
 ```
 If you encounter PowerShell permission issues on Windows, use:
-```
+```sh
 .\venv\Scripts\python.exe -m pip install -r requirements.txt
 ```
 
-
-## Creating a Scrapy Project
+## 2. Creating a Scrapy Project
 Scrapy helps you create a structured web scraping project.
 
-### 5. Start Scrapy Project
-Start a new Scrapy project with the name fire_incidents.
-```
+### 21. Start Scrapy Project
+Start a new Scrapy project with the name `fire_incidents`.
+```sh
 scrapy startproject fire_incidents
 ```
 If you encounter PowerShell permission issues on Windows, use:
-```
+```sh
 .\venv\Scripts\python.exe -m scrapy startproject fire_incidents
 ```
 
+## 3. Creating the Crawler Class
 
-
-## Creating the Crawler Class
+### 31. Explanation of the Logic
 The crawler retrieves information from the website using XPath expressions.
-- XPath is an XML Path Language used to navigate and select nodes from XML documents.
-- Testing XPath on the fly, run the following command to open the scrapy shell:
 
-### Explanation of the Logic
-scrapy shell
-- Fetch the page
->>> r = scrapy.Request(url="https://fireandemergency.nz/incidents-and-news/incident-reports/")
->>> fetch(r)
-- Get the h3 Central
->>> on_central_div = response.xpath("//div[@class='incidentreport__region'][h3[text()='Central']]")
->>> on_central_div
-- Get one of the 1st list element
->>> li = region_central_div.xpath(".//ul[@class='incidentreport__region__list']/li/a")[0]
-- extract the href from the 1st list element
->>> li.xpath("@href").get() 
-- extract the text from the 1st list element
->>> li.xpath("text()").get().strip()
+311. Open the Scrapy shell to test XPath on the fly:
+    ```sh
+    scrapy shell
+    ```
 
-### 6. Create a Spider
+312. Fetch the page:
+    ```python
+    r = scrapy.Request(url="https://fireandemergency.nz/incidents-and-news/incident-reports/")
+    fetch(r)
+    ```
+
+313. Get the Central region div:
+    ```python
+    on_central_div = response.xpath("//div[@class='incidentreport__region'][h3[text()='Central']]")
+    on_central_div
+    ```
+
+314. Get the first list element:
+    ```python
+    li = on_central_div.xpath(".//ul[@class='incidentreport__region__list']/li/a")[0]
+    ```
+
+315. Extract the href from the first list element:
+    ```python
+    li.xpath("@href").get()
+    ```
+
+316. Extract the text from the first list element:
+    ```python
+    li.xpath("text()").get().strip()
+    ```
+
+### 32. Create a Spider
 Create a spider to crawl the web page.
-
-```
+```sh
 cd fire_incidents
 scrapy genspider incident_reports fireandemergency.nz/incidents-and-news/incident-reports
 ```
+Check the `robots.txt` of the website to ensure you are allowed to crawl it:
+- [https://fireandemergency.nz/robots.txt](https://fireandemergency.nz/robots.txt)
 
-#### Check the robots.txt of the website to ensure you are allowed to crawl it:
-- https://fireandemergency.nz/robots.txt
-
-
-
-
-## Running the Crawler
+## 4. Running the Crawler
 The spider class will crawl the web, extract fire incident report data, and save it to a CSV file.
-The command syntax used to execute the spider to crawl the webpage is
-- scrapy crawl <spider_name> <url_without_the_https_and_forward_slash> [-o <file_name>]
 
-### 7. Run Combine
-The run combine first executes the Main_1_ScrapyRunner.py, followed by Main_2_AnalyzeData.py
-
-```
+### 41. Run Combine
+First, execute the `Main_1_ScrapyRunner.py`, followed by `Main_2_AnalyzeData.py`.
+```sh
 python Main_3_Combine.py
 ```
-### 7b. Crawl the Webpage
-Run the spider to extract data and save it into a CSV file in the data folder.
 
-```
+### 42. Crawl the Webpage
+Run the spider to extract data and save it into a CSV file in the `data` folder.
+```sh
 cd path/to/your/root/directory
 python Main_1_ScrapyRunner.py
 ```
 
-### 7c. Perform the Analysis
-This script retrieves and analysis the latest day_of_week_incident_reports CSV file to answer the following questions:
+### 43. Perform the Analysis
+This script retrieves and analyzes the latest `day_of_week_incident_reports` CSV file to answer the following questions:
 
 - How many incidents has the Stratford Brigade responded to in the last 7 days?
 - How many medical incidents have been reported in the Central Region in the last 7 days?
 - Where were the medical incidents reported in the last 7 days?
-Run the analysis script:
 
-```
+Run the analysis script:
+```sh
 python Main_2_AnalyzeData.py
 ```
 
-## 8. Conclusion
+## 5. Conclusion
 By following the steps outlined in this README, you will be able to set up your environment, create and run a Scrapy project, and analyze fire incident report data effectively. This guide ensures that new users can easily make use of the provided Scrapy code.
-
-
-
-
-
-

@@ -130,6 +130,9 @@ ENV/
 env.bak/
 venv.bak/
 
+# Do not include the data file
+data
+
 # Spyder project settings
 .spyderproject
 .spyproject
